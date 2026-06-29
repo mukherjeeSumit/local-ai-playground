@@ -1,13 +1,15 @@
 import requests
 
+prompt = input("You: ")
+
 response = requests.post(
     "http://localhost:11434/api/generate",
     json ={
         "model": "llama3.2:1b",
-        "prompt": "In one sentence, explain what an api is",
+        "prompt": prompt,
         "stream": False
     }
 )
 
 result = response.json()
-print(result["response"])
+print("\nAI: ", result["response"])
