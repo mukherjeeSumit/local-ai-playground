@@ -117,6 +117,92 @@ The same code can answer unlimited questions because the prompt comes from the u
 
 ---
 
+## Conversation Memory
+
+### What I Built
+
+Added conversation history so the application sends previous messages along with the current prompt.
+
+### Key Concepts
+
+- LLMs do **not** remember previous conversations by themselves.
+- Conversation memory is managed by the application, not the model.
+- Stored chat history in a Python list.
+- Used `"\n".join(history)` to combine the conversation into a single prompt.
+
+### Architecture
+
+```text
+User
+   │
+Current Message
+   │
+   ▼
+Conversation History
+   │
+   ▼
+Python
+   │
+HTTP Request
+   │
+   ▼
+Ollama
+   │
+   ▼
+Llama 3.2
+   │
+HTTP Response
+   │
+   ▼
+Python
+```
+
+### What I Observed
+
+The model remembered my name because I sent the previous conversation again.
+
+However, after a few messages it started repeating earlier responses instead of answering naturally.
+
+Example:
+
+```
+You: My name is Sumit.
+
+AI: Hello Sumit!
+
+You: Explain Airflow.
+
+AI: Airflow is...
+
+You: What is my name?
+
+AI: Hello Sumit! Airflow is...
+```
+
+### Why This Happened
+
+I was using Ollama's **generate endpoint**, which treats the entire conversation as one large block of text.
+
+The model simply continues that text instead of understanding separate user and assistant messages.
+
+Modern AI chat applications solve this by using a **Chat API**, where every message has a role such as:
+
+- user
+- assistant
+- system
+
+This makes conversations much more reliable.
+
+### Biggest Takeaway
+
+The model doesn't have memory.
+
+The application creates the illusion of memory by sending previous messages with every request.
+
+I also learned that **how** we send conversation history matters. Sending one long string works, but using a structured Chat API is the production approach.
+
+---
+
 # Progress Tracker
 
 ## Project
@@ -127,11 +213,12 @@ The same code can answer unlimited questions because the prompt comes from the u
 
 - ✅ Connect Python to Ollama
 - ✅ Understand JSON API responses
-- ✅ Build an interactive command-line chatbot
+- ✅ Interactive command-line chatbot
+- ✅ Basic conversation memory
 
 ### Upcoming Features
 
-- ⏳ Conversation memory
+- ⏳ Chat API
 - ⏳ Streaming responses
 - ⏳ Prompt templates
 - ⏳ Error handling
@@ -140,8 +227,10 @@ The same code can answer unlimited questions because the prompt comes from the u
 
 ---
 
-# Biggest Lesson So Far
+# Biggest Lessons So Far
 
-I'm realizing that AI Engineering isn't just about using an LLM.
-
-It's about understanding how software communicates with an LLM, how information flows through the system, and how applications use the structured data returned by the model.
+1. Applications communicate with LLMs through APIs.
+2. AI APIs return structured JSON, not plain text.
+3. User input makes applications dynamic.
+4. LLMs don't remember conversations—applications do.
+5. There are different ways to build chat applications, and using a structured Chat API is more reliable than sending one large text prompt.

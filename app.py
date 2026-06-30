@@ -1,15 +1,29 @@
 import requests
 
-prompt = input("You: ")
+history = []
 
-response = requests.post(
-    "http://localhost:11434/api/generate",
-    json ={
-        "model": "llama3.2:1b",
-        "prompt": prompt,
-        "stream": False
-    }
-)
+while True:
+    prompt = input("You: ")
 
-result = response.json()
-print("\nAI: ", result["response"])
+    if prompt.lower() == "exit":
+        break
+
+    history.append(f"User: {prompt}")
+
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "llama3.2:1b",
+            "prompt": "\n".join(history),
+            "stream": False
+        }
+    )
+
+    result = response.json()
+
+    answer = result["response"]
+
+    print("\nAI:", answer)
+
+    history.append(f"Assistant: {answer}")
+
